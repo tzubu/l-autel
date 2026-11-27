@@ -23,6 +23,8 @@ npm ci
 npm run build
 ```
 
+Pour reconstruire la version GitHub Pages, exécuter `npm run build -- --web`. Elle utilise `docs/index.html` et charge les ressources séparément.
+
 ## Crédits
 
 - Autel, Pouet et poème issus du prototype fourni.

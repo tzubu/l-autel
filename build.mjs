@@ -1,6 +1,12 @@
-import {readFile,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {basename,dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {build} from 'esbuild';
+
+const args=process.argv.slice(2);
+const web=args.includes('--web');
+const destination=resolve(args.find(arg=>arg!=='--web') ?? (web ? 'docs/index.html' : "L'autel.html"));
+const assetLoader=web ? 'file' : 'dataurl';
 
 const [html,css,result,license]=await Promise.all([
   readFile(new URL('./src/index.html',import.meta.url),'utf8'),
@@ -8,11 +14,17 @@ const [html,css,result,license]=await Promise.all([
   build({
     entryPoints:[fileURLToPath(new URL('./src/game.js',import.meta.url))],
     bundle:true,format:'iife',target:'es2021',write:false,minify:true,
-    loader:{'.glb':'dataurl','.jpg':'dataurl','.txt':'text'}
+    outdir:web ? dirname(destination) : undefined,
+    entryNames:'game-[hash]',
+    assetNames:'assets/[name]-[hash]',
+    loader:{'.glb':assetLoader,'.jpg':assetLoader,'.txt':'text'}
   }),
   readFile(new URL('./node_modules/three/LICENSE',import.meta.url),'utf8')
 ]);
-const bundle=result.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
+const scriptFile=result.outputFiles.find(file=>file.path.endsWith('.js')) ?? result.outputFiles[0];
+const script=web
+  ? `<script defer src="./${basename(scriptFile.path)}"></script>`
+  : `<script>${scriptFile.text.replace(/<\/script/gi,'<\\/script')}</script>`;
 const attribution=`\n<!--
 Three.js
 ${license.trim()}
@@ -28,6 +40,12 @@ https://sketchfab.com/3d-models/pine-trees-pack-lowpoly-game-ready-lods-e1e9c07b
 Pins repris du prototype avec placement et rendu ajustés.
 -->\n`;
 const output=html.replace('/* game styles */',()=>css)
-  .replace('/* game bundle */',()=>bundle)
+  .replace('<script>/* game bundle */</script>',()=>script)
   .replace('</body>',()=>attribution+'</body>');
-await writeFile(process.argv[2] ?? "L'autel.html",output);
+if(web){
+  for(const file of result.outputFiles){
+    await mkdir(dirname(file.path),{recursive:true});
+    await writeFile(file.path,file.contents);
+  }
+}
+await writeFile(destination,output);
