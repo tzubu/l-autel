@@ -49,7 +49,8 @@ const water = new T.Mesh(new T.PlaneGeometry(1450,1450), new T.ShaderMaterial({
 
       float z=p.y,x=p.x;
       float center=sin(z*.047)*3.4;
-      float coastWidth=33.+380.*smoothstep(-28.,115.,z);
+      float sideExtension=26.*smoothstep(-31.,-4.,z)*(1.-smoothstep(60.,140.,z));
+      float coastWidth=33.+380.*smoothstep(-28.,115.,z)+sideExtension;
       float edge=length(vec2((x-center)/coastWidth,max(28.-z,0.)/78.))+
         .037*sin(z*.22+x*.12)+.018*sin(x*.36-z*.11);
       float shore=mix(.895,.939,1.-smoothstep(-25.,45.,z));

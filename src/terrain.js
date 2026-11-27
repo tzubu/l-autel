@@ -10,7 +10,8 @@ export const altarX = pathX(altarZ);
 // The headland widens inland, with its wooded hills continuing behind the path.
 function profile(x, z) {
   const center = Math.sin(z * .047) * 3.4;
-  const width = 33 + 380 * smooth(-28, 115, z);
+  const sideExtension = 26 * smooth(-31, -4, z) * (1 - smooth(60, 140, z));
+  const width = 33 + 380 * smooth(-28, 115, z) + sideExtension;
   const edge = Math.hypot((x - center) / width, Math.max(28 - z, 0) / 78)
     + .037 * Math.sin(z * .22 + x * .12)
     + .018 * Math.sin(x * .36 - z * .11);
