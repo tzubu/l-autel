@@ -12,6 +12,7 @@ import rocksUrl from './assets/mossy-rocks.glb';
 import grassColorUrl from './assets/grass_ground_diff_1k.jpg';
 import grassNormalUrl from './assets/grass_ground_nor_gl_1k.jpg';
 import meadowColorUrl from './assets/Grass004_1K-JPG_Color.jpg';
+import oceanSlopesUrl from './assets/ocean-slopes.png';
 import poem from './assets/poeme.txt';
 
 const $ = id => document.getElementById(id);
@@ -69,7 +70,7 @@ function rnd() {
   seed=(Math.imul(seed,1664525)+1013904223)>>>0;
   return seed/4294967296;
 }
-const updateSky=makeSkyAndOcean(scene);
+let updateSky;
 const wind={value:0};
 const position=v(pathX(23),ground(pathX(23),23),23);
 const move=v(), up=v(0,1,0);
@@ -310,7 +311,7 @@ function film(now) {
 function loadAssets(){
   const gltf=new GLTFLoader(), textures=new T.TextureLoader();
   const models=[pinsUrl,altarUrl,pouetUrl,rocksUrl];
-  const maps=[grassColorUrl,grassNormalUrl,meadowColorUrl];
+  const maps=[grassColorUrl,grassNormalUrl,meadowColorUrl,oceanSlopesUrl];
   const progress=$('load-progress');
   const fractions=Array(models.length+maps.length).fill(0);
   function report(index,fraction){
@@ -338,7 +339,7 @@ function loadAssets(){
 async function init() {
   updateWalkCamera();
   try {
-    const [pines, shrine, character, rocks, color, normal, meadow]=await loadAssets();
+    const [pines, shrine, character, rocks, color, normal, meadow, oceanSlopes]=await loadAssets();
     $('load-message').textContent='Préparation du paysage…';
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     $('poem').textContent=poem;
@@ -347,6 +348,8 @@ async function init() {
       tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
     }
     color.colorSpace=meadow.colorSpace=T.SRGBColorSpace;
+    updateSky=makeSkyAndOcean(scene,oceanSlopes);
+    updateSky(performance.now()/1000,camera);
     makeTerrain(scene,color,normal,meadow);
     updateMeadow=makeMeadow(scene,rnd,wind);
     obstacles.push(...makeForest(scene,pines,rnd),...scatterStones(scene,rocks,rnd));
@@ -441,7 +444,7 @@ function frame(now) {
   } else if(state==='movie') film(now);
   if(updateEffects) updateEffects(time,camera);
   if(updateMeadow) updateMeadow(camera);
-  updateSky(time,camera);
+  if(updateSky) updateSky(time,camera);
   if(state!=='end' && state!=='loading' && state!=='ready') renderer.render(scene,camera);
 }
 requestAnimationFrame(frame);

@@ -17,7 +17,7 @@ const [html,css,result,license]=await Promise.all([
     outdir:web ? dirname(destination) : undefined,
     entryNames:'game-[hash]',
     assetNames:'assets/[name]-[hash]',
-    loader:{'.glb':assetLoader,'.jpg':assetLoader,'.txt':'text'}
+    loader:{'.glb':assetLoader,'.jpg':assetLoader,'.png':assetLoader,'.txt':'text'}
   }),
   readFile(new URL('./node_modules/three/LICENSE',import.meta.url),'utf8')
 ]);
