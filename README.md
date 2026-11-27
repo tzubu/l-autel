@@ -19,8 +19,7 @@
 
 ## Crédits
 
-- J’ai créé Pouet et l’autel.
-- Le poème vient de la première version du projet.
+- Pouet et Autel par Tzubu
 - [Grass Ground](https://polyhaven.com/a/grass_ground) par Charlotte Baglioni et Poly Haven, CC0 1.0. Couleur et normales adaptées au terrain.
 - [Grass 004](https://ambientcg.com/view?id=Grass004) par ambientCG, CC0 1.0. Couleur combinée à celle du terrain.
 - [Rock Moss Set 01](https://polyhaven.com/a/rock_moss_set_01) par Kless Gyzen et Poly Haven, CC0 1.0. Géométrie allégée pour le jeu.
