@@ -142,8 +142,17 @@ export function scatterStones(scene,gltf,rnd) {
     if(surface<-8.7 || Math.abs(x-pathX(z))<2.25 || Math.hypot(x-altarX,z-altarZ)<2.55) continue;
     const stone=variants[i%variants.length], scale=.24+rnd()**1.5*1.7;
     if(scale>.7 && Math.abs(x-pathX(z))<2.60+scale*.43) continue;
-    const y=surface-stone.height*scale*.22;
-    stone.placements.push({x,y,z,scale,yaw:rnd()*Math.PI*2});
+    const yaw=rnd()*Math.PI*2, radius=scale*.55;
+    let low=surface, high=surface;
+    for(let j=0;j<8;j++){
+      const angle=yaw+j*Math.PI/4;
+      const support=ground(x+Math.cos(angle)*radius,z+Math.sin(angle)*radius);
+      low=Math.min(low,support);
+      high=Math.max(high,support);
+    }
+    if(low<-8.7 || high-low>radius*.86) continue;
+    const y=Math.min(surface-stone.height*scale*.22,low-stone.height*scale*.07);
+    stone.placements.push({x,y,z,scale,yaw});
     if(scale>.7) obstacles.push({x,z,radius:scale*.40,top:y+stone.height*scale*.91});
   }
   for(const {geometry,material,placements} of variants){

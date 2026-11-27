@@ -98,7 +98,6 @@ function openPrayer() {
   if (state!=='walk' || !canApproach()) return;
   state='sitting';
   keys.clear();
-  $('cross').hidden=true;
   $('prompt').hidden=true;
   introEye.copy(camera.position);
   camera.getWorldDirection(introLook).multiplyScalar(3).add(camera.position);
@@ -112,7 +111,6 @@ function openPrayer() {
 function closePrayer() {
   if (state!=='writing' && state!=='sitting') return;
   $('prayer').hidden=true;
-  $('cross').hidden=false;
   prayerPose.firstPerson(false);
   prayerPose.set(0);
   showPouet(false);
@@ -128,7 +126,6 @@ function capturePointer(){
 function beginWalk(){
   state='walk';
   $('intro').hidden=true;
-  $('cross').hidden=false;
 }
 
 $('start').addEventListener('click',()=>{

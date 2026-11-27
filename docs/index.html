@@ -9,9 +9,8 @@
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #171519; color: #fff6e9; font-family: Georgia, serif; }
 canvas { display: block; width: 100vw; height: 100vh; }
 #game { position: fixed; inset: 0; }
-#cross, #prompt, #loading, #message { position: fixed; left: 50%; transform: translateX(-50%); text-align: center; }
-#cross, #loading, #message { text-shadow: 0 2px 12px #000, 0 1px 4px #000; pointer-events: none; }
-#cross { top: 50%; font-size: 25px; transform: translate(-50%, -50%); opacity: .75; }
+#prompt, #loading, #message { position: fixed; left: 50%; transform: translateX(-50%); text-align: center; }
+#loading, #message { text-shadow: 0 2px 12px #000, 0 1px 4px #000; pointer-events: none; }
 #intro { position: fixed; z-index: 2; inset: 0; display: grid; place-items: center; background: #000; }
 #start { background: transparent; color: white; border: 1px solid #fff9; padding: 12px 32px; font: 23px Georgia, serif; }
 #start:not(:disabled):hover { background: #ffffff17; border-color: white; }
@@ -47,7 +46,6 @@ button:hover { background: #f0d6b0; }
 </head>
 <body>
   <main id="game" aria-label="Paysage de L'autel"></main>
-  <div id="cross" aria-hidden="true" hidden>·</div>
   <button id="prompt" type="button" hidden>E pour s’asseoir à l’autel</button>
   <div id="intro">
     <button id="start" type="button" disabled>Commencer</button>
@@ -68,7 +66,7 @@ button:hover { background: #f0d6b0; }
   <div id="message" hidden>Votre prière n'a pas été entendue, parce que flemme de coder un truc. Mais par contre, je vous propose ce poème en forme de Pouet (ou de quille, au choix).</div>
   <div id="black"></div>
   <section id="ending" hidden><pre id="poem"></pre></section>
-  <script defer src="./game-GI2ZWSUY.js"></script>
+  <script defer src="./game-JMC7RUHE.js"></script>
 
 <!--
 Three.js
