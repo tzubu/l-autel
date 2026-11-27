@@ -51,27 +51,37 @@ export function makeForest(scene, gltf, rnd) {
   }
   const models = Array.from(variants.values());
   const trees = [], dummy = new T.Object3D(), tint = new T.Color();
+  function plant(px,pz,distant) {
+    const y=ground(px,pz);
+    const low=Math.min(ground(px+.9,pz),ground(px-.9,pz),ground(px,pz+.9),ground(px,pz-.9));
+    if(y<-.3 || y-low>.72 || rnd()<.15) return;
+    const variant=Math.floor(rnd()*models.length);
+    const height=(variant===2 ? 3.5 : 6.1)+rnd()*4.7;
+    const lod=!distant && pz<25 && Math.abs(px)<13 ? 0 : 1;
+    const angle=rnd()*Math.PI*2, c=Math.cos(angle), s=Math.sin(angle);
+    const model=models[variant][lod], scale=height/model.height;
+    let rootY=y-.11;
+    for(const a of model.anchors){
+      const footX=px+scale*(a.x*c+a.z*s), footZ=pz+scale*(-a.x*s+a.z*c);
+      rootY=Math.min(rootY,ground(footX,footZ)-scale*a.y-.085);
+    }
+    if(y-rootY>1.4) return;
+    trees.push({x:px,z:pz,y:rootY,scale,angle,variant,lod,radius:.16+height*.032,distant});
+  }
   for (let z = -19; z < 92; z += 4.2) {
     for (let x = -30; x < 31; x += 3.8) {
       const px = x + (rnd() - .5) * 2.8, pz = z + (rnd() - .5) * 3.3;
       if (Math.abs(px - pathX(pz)) < 3.3 && pz < 55) continue;
       if (Math.hypot(px - altarX, pz - altarZ) < 9 ||
           (pz < -13 && Math.abs(px - altarX) < 12)) continue;
-      const y = ground(px, pz);
-      const low = Math.min(ground(px+.9,pz),ground(px-.9,pz),ground(px,pz+.9),ground(px,pz-.9));
-      if (y < -.3 || y-low > .72 || rnd() < .15) continue;
-      const variant = Math.floor(rnd() * models.length);
-      const height = (variant === 2 ? 3.5 : 6.1) + rnd() * 4.7;
-      const lod=pz<25 && Math.abs(px)<13 ? 0 : 1;
-      const angle=rnd()*Math.PI*2, c=Math.cos(angle), s=Math.sin(angle);
-      const model=models[variant][lod], scale=height/model.height;
-      let rootY=y-.11;
-      for(const a of model.anchors){
-        const footX=px+scale*(a.x*c+a.z*s), footZ=pz+scale*(-a.x*s+a.z*c);
-        rootY=Math.min(rootY,ground(footX,footZ)-scale*a.y-.085);
-      }
-      if(y-rootY>1.4) continue;
-      trees.push({x:px,z:pz,y:rootY,scale,angle,variant,lod,radius:.16+height*.032});
+      plant(px,pz,false);
+    }
+  }
+  for(let z=5;z<150;z+=17) {
+    for(let x=-104;x<=104;x+=16) {
+      const px=x+(rnd()-.5)*13, pz=z+(rnd()-.5)*14;
+      if(Math.abs(px)<36 && pz<93) continue;
+      plant(px,pz,true);
     }
   }
   for (let variant = 0; variant < models.length; variant++) {
@@ -80,7 +90,8 @@ export function makeForest(scene, gltf, rnd) {
       const tiles = new Map();
       for (const tree of trees) {
         if (tree.variant!==variant || tree.lod!==lod) continue;
-        const key = [Math.floor(tree.x/20),Math.floor(tree.z/21)].join(',');
+        const tileSize=tree.distant ? 50 : 20;
+        const key = [Math.floor(tree.x/tileSize),Math.floor(tree.z/tileSize),tree.distant].join(',');
         if (!tiles.has(key)) tiles.set(key,[]);
         tiles.get(key).push(tree);
       }
@@ -98,14 +109,14 @@ export function makeForest(scene, gltf, rnd) {
             batch.setColorAt(i,tint);
           }
           batch.computeBoundingSphere();
-          batch.castShadow = true;
+          batch.castShadow = !group[0].distant;
           batch.receiveShadow = true;
           scene.add(batch);
         }
       }
     }
   }
-  return trees.map(({x,z,radius}) => ({x,z,radius}));
+  return trees.filter(tree=>!tree.distant).map(({x,z,radius}) => ({x,z,radius}));
 }
 
 export function scatterStones(scene,gltf,rnd) {

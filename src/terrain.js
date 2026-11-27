@@ -7,18 +7,23 @@ export const altarZ = -22.3;
 export const pathX = z => 1.55 * Math.sin(z * .12) + .55 * Math.sin(z * .25);
 export const altarX = pathX(altarZ);
 
-// A peninsula with high ground at the shrine and a lower, sandy back shore.
+// The headland widens inland, with its wooded hills continuing behind the path.
 function profile(x, z) {
   const center = Math.sin(z * .047) * 3.4;
-  const edge = Math.hypot((x - center) / 33, (z - 28) / 78)
+  const width = 33 + 380 * smooth(-28, 115, z);
+  const edge = Math.hypot((x - center) / width, Math.max(28 - z, 0) / 78)
     + .037 * Math.sin(z * .22 + x * .12)
     + .018 * Math.sin(x * .36 - z * .11);
   const coast = 1 - smooth(.64, 1.02, edge);
+  const inland = smooth(27, 138, z);
   const hill = 1.8 + 5.7 * (1 - smooth(-23, 24, z))
-    + 1.2 * Math.exp(-((z - 55) ** 2) / 600);
+    + 1.2 * Math.exp(-((z - 55) ** 2) / 600)
+    + inland * (13.0 + 4.5 * Math.sin(x * .024 + z * .021)
+      + 3.4 * Math.cos(z * .045 - x * .031));
   const offPath = smooth(2, 6, Math.abs(x - pathX(z)));
   const clearing = smooth(3.5, 8, Math.hypot(x - altarX, z - altarZ));
-  const relief = offPath * clearing * (
+  const nearRelief = 1 - smooth(45, 105, Math.max(Math.abs(x), z));
+  const relief = offPath * clearing * nearRelief * (
     .52 * Math.sin(x * .32 + z * .18) + .32 * Math.cos(z * .35 - x * .21)
     + .14 * Math.sin(x * .71 - z * .42));
   const floor = -15 + 1.7 * Math.exp(-((edge - 1.035) ** 2) * 90);
@@ -26,20 +31,44 @@ function profile(x, z) {
   return lerp(lerp(floor, hill + relief, coast),7.44,terrace);
 }
 
-const minX = -50, minZ = -59, step = .70, cellsX = 144, cellsZ = 257;
+// Extend the fine grid with progressively larger cells outside the playing area.
+function extendAxis(axis, direction, boundary) {
+  const outer = [];
+  let edge = direction < 0 ? axis[0] : axis[axis.length-1], stride = .70;
+  while (direction * edge < direction * boundary) {
+    stride = Math.min(14, stride * 1.17);
+    edge += direction * stride;
+    outer.push(edge);
+  }
+  return direction < 0 ? outer.reverse().concat(axis) : axis.concat(outer);
+}
+
+const columns = extendAxis(extendAxis(Array.from({length:105},(_,i)=>-36+i*.70), -1, -465), 1, 465);
+const rows = extendAxis(Array.from({length:164},(_,i)=>-59+i*.70), 1, 655);
+const cellsX = columns.length - 1, cellsZ = rows.length - 1;
 const heights = new Float32Array((cellsX + 1) * (cellsZ + 1));
 const index = (x, z) => z * (cellsX + 1) + x;
 for (let z = 0; z <= cellsZ; z++) {
   for (let x = 0; x <= cellsX; x++) {
-    heights[index(x, z)] = profile(minX + x * step, minZ + z * step);
+    heights[index(x, z)] = profile(columns[x], rows[z]);
   }
 }
 
 // Barycentric sampling uses the same triangles as the rendered ground.
+function cell(axis, value) {
+  let a=0, b=axis.length-1;
+  while (b-a>1) {
+    const middle=(a+b)>>1;
+    if (axis[middle]<=value) a=middle;
+    else b=middle;
+  }
+  return a;
+}
+
 export function ground(x, z) {
-  const u = clamp((x - minX) / step, 0, cellsX - .0001);
-  const v = clamp((z - minZ) / step, 0, cellsZ - .0001);
-  const i = Math.floor(u), j = Math.floor(v), a = u - i, b = v - j;
+  const i=cell(columns,x), j=cell(rows,z);
+  const a=clamp((x-columns[i])/(columns[i+1]-columns[i]),0,1);
+  const b=clamp((z-rows[j])/(rows[j+1]-rows[j]),0,1);
   const h00 = heights[index(i, j)], h10 = heights[index(i + 1, j)];
   const h01 = heights[index(i, j + 1)], h11 = heights[index(i + 1, j + 1)];
   return a + b <= 1
@@ -59,7 +88,7 @@ export function makeTerrain(scene, grassColor, grassNormal, meadowColor) {
   const pos = [], uv = [], mask = [], indices = [];
   for (let j = 0; j <= cellsZ; j++) {
     for (let i = 0; i <= cellsX; i++) {
-      const x = minX + i * step, z = minZ + j * step, y = heights[index(i, j)];
+      const x = columns[i], z = rows[j], y = heights[index(i, j)];
       const grade = Math.hypot(ground(x + .3, z) - ground(x - .3, z),
         ground(x, z + .3) - ground(x, z - .3)) / .6;
       pos.push(x, y, z);
