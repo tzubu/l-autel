@@ -1,0 +1,3 @@
+* text=auto
+docs/index.html -diff
+src/assets/poeme.txt -text

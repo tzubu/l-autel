@@ -1,0 +1,28 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #171519; color: #fff6e9; font-family: Georgia, serif; }
+canvas { display: block; width: 100vw; height: 100vh; }
+#game { position: fixed; inset: 0; }
+#cross, #prompt, #loading, #message { position: fixed; left: 50%; transform: translateX(-50%); text-align: center; }
+#cross, #loading, #message { text-shadow: 0 2px 12px #000, 0 1px 4px #000; pointer-events: none; }
+#cross { top: 50%; font-size: 25px; transform: translate(-50%, -50%); opacity: .75; }
+#intro { position: fixed; z-index: 2; inset: 0; display: grid; place-items: center; background: #000; }
+#start { background: transparent; color: white; border: 1px solid #fff9; padding: 12px 32px; font: 23px Georgia, serif; }
+#start:hover { background: #ffffff17; border-color: white; }
+#start:active { background: #ffffff29; }
+#prompt { bottom: 14%; color: #fff; padding: 9px 18px; border: 1px solid #ffdc9c6a; white-space: nowrap; }
+#loading { top: 55%; width: min(90vw, 460px); font-size: 19px; }
+#message { top: 55%; width: min(89%, 760px); padding: 18px 24px; border-radius: 9px; font-size: clamp(18px, 2.4vw, 27px); line-height: 1.5; }
+#prompt, #message { background: #0008; backdrop-filter: blur(9px); box-shadow: 0 0 32px 8px #0004; }
+#prayer { position: fixed; inset: 0; display: flex; justify-content: center; align-items: end; padding: 12px 12px min(6vh, 45px); background: linear-gradient(transparent 40%, #18101a88); }
+#prayer form { width: min(92vw, 420px); padding: 19px; background: #120e13ad; backdrop-filter: blur(10px); border: 1px solid #e5c29c70; box-shadow: 0 20px 80px #0008; display: grid; gap: 13px; }
+label { font-size: 22px; text-align: center; }
+textarea { width: 100%; resize: vertical; min-height: 65px; max-height: 32vh; border: 1px solid #fff4; background: #ffffff0a; color: #fff6e9; padding: 11px; font: 16px Georgia, serif; }
+.actions { display: flex; justify-content: flex-end; gap: 10px; }
+button { background: #dec19b; color: #241c17; border: 1px solid transparent; border-radius: 3px; padding: 8px 17px; font: 16px Georgia, serif; cursor: pointer; }
+button:hover { background: #f0d6b0; }
+#prompt:hover { background: #000b; }
+:focus-visible { outline: 2px solid #edbe83; outline-offset: 2px; }
+#black { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 2.5s ease; }
+#ending { position: fixed; inset: 0; background: #000; overflow: auto; display: flex; justify-content: center; align-items: safe center; padding: 44px 25px; }
+#poem { white-space: pre-wrap; font: clamp(13px, 1.6vw, 20px) / 1.42 Georgia, serif; max-width: 850px; text-align: center; margin: auto; opacity: 0; transition: opacity 2s ease; }
+[hidden] { display: none !important; }

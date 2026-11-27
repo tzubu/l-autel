@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>L'autel</title>
+  <style>/* game styles */</style>
+</head>
+<body>
+  <main id="game" aria-label="Paysage de L'autel"></main>
+  <div id="cross" aria-hidden="true" hidden>·</div>
+  <button id="prompt" type="button" hidden>E pour s’asseoir à l’autel</button>
+  <div id="intro">
+    <button id="start" type="button">Commencer</button>
+    <div id="loading" role="status" hidden></div>
+  </div>
+  <section id="prayer" hidden>
+    <form id="form" aria-labelledby="prayer-title">
+      <label id="prayer-title" for="words">Écrivez votre prière</label>
+      <textarea id="words" maxlength="3000" rows="4"></textarea>
+      <div class="actions">
+        <button type="submit">Prier</button>
+      </div>
+    </form>
+  </section>
+  <div id="message" hidden>Votre prière n'a pas été entendue, parce que flemme de coder un truc. Mais par contre, je vous propose ce poème en forme de Pouet.</div>
+  <div id="black"></div>
+  <section id="ending" hidden><pre id="poem"></pre></section>
+  <script>/* game bundle */</script>
+</body>
+</html>
