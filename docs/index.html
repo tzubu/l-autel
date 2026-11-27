@@ -14,10 +14,20 @@ canvas { display: block; width: 100vw; height: 100vh; }
 #cross { top: 50%; font-size: 25px; transform: translate(-50%, -50%); opacity: .75; }
 #intro { position: fixed; z-index: 2; inset: 0; display: grid; place-items: center; background: #000; }
 #start { background: transparent; color: white; border: 1px solid #fff9; padding: 12px 32px; font: 23px Georgia, serif; }
-#start:hover { background: #ffffff17; border-color: white; }
-#start:active { background: #ffffff29; }
+#start:not(:disabled):hover { background: #ffffff17; border-color: white; }
+#start:not(:disabled):active { background: #ffffff29; }
+#start:disabled { opacity: .55; cursor: wait; }
 #prompt { bottom: 14%; color: #fff; padding: 9px 18px; border: 1px solid #ffdc9c6a; white-space: nowrap; }
-#loading { top: 55%; width: min(90vw, 460px); font-size: 19px; }
+#loading { top: calc(50% + 47px); width: min(84vw, 270px); color: #fff; font: 14px/1.4 system-ui, sans-serif; }
+#load-progress { display: block; width: 100%; height: 6px; margin: 0 0 10px; appearance: none; border: 0; border-radius: 4px; overflow: hidden; background: #303030; }
+#load-progress::-webkit-progress-bar { background: #303030; }
+#load-progress::-webkit-progress-value { background: #eee; }
+#load-progress::-moz-progress-bar { background: #eee; }
+#load-progress:indeterminate { background: linear-gradient(90deg, #303030 30%, #eee 50%, #303030 70%) 100% 0 / 250% 100%; animation: load-sweep 1.55s linear infinite; }
+#load-progress:indeterminate::-webkit-progress-bar { background: transparent; }
+#load-progress:indeterminate::-moz-progress-bar { background: transparent; }
+@keyframes load-sweep { to { background-position: -65% 0; } }
+@media (prefers-reduced-motion: reduce) { #load-progress:indeterminate { animation: none; } }
 #message { top: 55%; width: min(89%, 760px); padding: 18px 24px; border-radius: 9px; font-size: clamp(18px, 2.4vw, 27px); line-height: 1.5; }
 #prompt, #message { background: #0008; backdrop-filter: blur(9px); box-shadow: 0 0 32px 8px #0004; }
 #prayer { position: fixed; inset: 0; display: flex; justify-content: center; align-items: end; padding: 12px 12px min(6vh, 45px); background: linear-gradient(transparent 40%, #18101a88); }
@@ -40,8 +50,11 @@ button:hover { background: #f0d6b0; }
   <div id="cross" aria-hidden="true" hidden>·</div>
   <button id="prompt" type="button" hidden>E pour s’asseoir à l’autel</button>
   <div id="intro">
-    <button id="start" type="button">Commencer</button>
-    <div id="loading" role="status" hidden></div>
+    <button id="start" type="button" disabled>Commencer</button>
+    <div id="loading">
+      <progress id="load-progress" max="100" aria-label="Progression du chargement"></progress>
+      <div id="load-message" role="status">Chargement du jeu…</div>
+    </div>
   </div>
   <section id="prayer" hidden>
     <form id="form" aria-labelledby="prayer-title">
@@ -55,7 +68,7 @@ button:hover { background: #f0d6b0; }
   <div id="message" hidden>Votre prière n'a pas été entendue, parce que flemme de coder un truc. Mais par contre, je vous propose ce poème en forme de Pouet.</div>
   <div id="black"></div>
   <section id="ending" hidden><pre id="poem"></pre></section>
-  <script defer src="./game-VIBKPV76.js"></script>
+  <script defer src="./game-WIRMRZC6.js"></script>
 
 <!--
 Three.js

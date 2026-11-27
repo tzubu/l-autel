@@ -12,8 +12,11 @@
   <div id="cross" aria-hidden="true" hidden>·</div>
   <button id="prompt" type="button" hidden>E pour s’asseoir à l’autel</button>
   <div id="intro">
-    <button id="start" type="button">Commencer</button>
-    <div id="loading" role="status" hidden></div>
+    <button id="start" type="button" disabled>Commencer</button>
+    <div id="loading">
+      <progress id="load-progress" max="100" aria-label="Progression du chargement"></progress>
+      <div id="load-message" role="status">Chargement du jeu…</div>
+    </div>
   </div>
   <section id="prayer" hidden>
     <form id="form" aria-labelledby="prayer-title">

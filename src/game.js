@@ -19,9 +19,25 @@ const v = (x,y,z) => new T.Vector3(x,y,z);
 const {clamp, lerp, smootherstep} = T.MathUtils;
 const smooth = x => smootherstep(x,0,1);
 const walkHeight=1.68, seatedHeight=1.19, playerRadius=.26;
+
+function loadError(message){
+  $('start').hidden=true;
+  $('load-progress').hidden=true;
+  $('load-message').textContent=message;
+}
+
+function createRenderer(){
+  try {
+    return new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+  } catch(error) {
+    loadError('Le jeu a besoin d’un navigateur compatible WebGL.');
+    throw error;
+  }
+}
+
 const scene=new T.Scene();
 const camera=new T.PerspectiveCamera(62,innerWidth/innerHeight,.045,620);
-const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+const renderer=createRenderer();
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
 renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace=T.SRGBColorSpace;
@@ -60,7 +76,7 @@ const move=v(), up=v(0,1,0);
 const keys=new Set();
 let yaw=0,pitch=0,vy=0,grounded=true,state='loading';
 let prayerZ, altarBox, pouet, prayerPose, updateEffects, updateMeadow, phaseStart=0;
-let pouetShadow, startRequested=false;
+let pouetShadow;
 const obstacles=[];
 const seatEye=v(), tableLook=v(), introEye=v(), introLook=v(), sideEye=v(), sideLook=v(), skyLook=v();
 const highEye=v(), orbitTarget=v(), viewDirection=v(), skyDirection=v();
@@ -115,10 +131,9 @@ function beginWalk(){
 }
 
 $('start').addEventListener('click',()=>{
-  if(state!=='ready' && state!=='loading') return;
-  startRequested=true;
+  if(state!=='ready') return;
   capturePointer();
-  if(state==='ready') beginWalk();
+  beginWalk();
 });
 $('prompt').addEventListener('click',openPrayer);
 $('form').addEventListener('submit',event=>{
@@ -292,16 +307,40 @@ function film(now) {
   camera.lookAt(look);
 }
 
+function loadAssets(){
+  const gltf=new GLTFLoader(), textures=new T.TextureLoader();
+  const models=[pinsUrl,altarUrl,pouetUrl,rocksUrl];
+  const maps=[grassColorUrl,grassNormalUrl,meadowColorUrl];
+  const progress=$('load-progress');
+  const fractions=Array(models.length+maps.length).fill(0);
+  function report(index,fraction){
+    fractions[index]=Math.max(fractions[index],fraction);
+    const done=fractions.reduce((sum,value)=>sum+value,0);
+    progress.value=Math.round(3+92*done/fractions.length);
+  }
+  progress.value=3;
+  return Promise.all([
+    ...models.map(async (url,index)=>{
+      const asset=await gltf.loadAsync(url,event=>{
+        if(event.total>0) report(index,Math.min(.90,.90*event.loaded/event.total));
+      });
+      report(index,1);
+      return asset;
+    }),
+    ...maps.map(async (url,index)=>{
+      const texture=await textures.loadAsync(url);
+      report(models.length+index,1);
+      return texture;
+    })
+  ]);
+}
+
 async function init() {
   updateWalkCamera();
   try {
-    const gltf=new GLTFLoader(), textures=new T.TextureLoader();
-    const [pines, shrine, character, rocks, color, normal, meadow]=await Promise.all([
-      gltf.loadAsync(pinsUrl),gltf.loadAsync(altarUrl),gltf.loadAsync(pouetUrl),
-      gltf.loadAsync(rocksUrl),
-      textures.loadAsync(grassColorUrl),textures.loadAsync(grassNormalUrl),
-      textures.loadAsync(meadowColorUrl)
-    ]);
+    const [pines, shrine, character, rocks, color, normal, meadow]=await loadAssets();
+    $('load-message').textContent='Préparation du paysage…';
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     $('poem').textContent=poem;
     for(const tex of [color,normal,meadow]){
       tex.wrapS=tex.wrapT=T.RepeatWrapping;
@@ -358,12 +397,12 @@ async function init() {
     updateMeadow(camera);
     renderer.render(scene,camera);
     state='ready';
-    if(startRequested) beginWalk();
+    $('load-progress').value=100;
+    $('loading').hidden=true;
+    $('start').disabled=false;
   } catch(error) {
     console.error(error);
-    $('start').hidden=true;
-    $('loading').hidden=false;
-    $('loading').textContent='Le paysage n’a pas pu se charger. Ouvrez le fichier dans un navigateur compatible WebGL.';
+    loadError('Le paysage n’a pas pu se charger. Recharge la page pour réessayer.');
   }
 }
 
